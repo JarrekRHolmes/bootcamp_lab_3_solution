@@ -5,6 +5,7 @@ import Container from "react-bootstrap/Container";
 import ListGroup from "react-bootstrap/ListGroup";
 import PendingTodoItem from "./PendingTodoItem";
 import Row from "react-bootstrap/Row";
+import TodoListForm from "./TodoListForm";
 
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
@@ -23,25 +24,6 @@ const TodoList = () => {
       complete: true,
     };
     setTodos([...existingTodos]);
-  };
-
-  const renderTodoForm = () => {
-    return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          addTodo();
-          e.target.reset();
-        }}
-      >
-        <input
-          onChange={(e) => {
-            setDraftTodo(e.target.value);
-          }}
-          placeholder="add task"
-        />
-      </form>
-    );
   };
 
   const renderTodos = () => {
@@ -93,7 +75,9 @@ const TodoList = () => {
       <Row className="justify-content-center mt-2">
         <h2>Todo List</h2>
       </Row>
-      <Row className="justify-content-center">{renderTodoForm()}</Row>
+      <Row className="justify-content-center">
+        <TodoListForm addTodo={addTodo} setDraftTodo={setDraftTodo} />
+      </Row>
       {renderTodos()}
     </Container>
   );
