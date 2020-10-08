@@ -6,34 +6,37 @@ import ListGroup from "react-bootstrap/ListGroup";
 import PendingTodoItem from "./PendingTodoItem";
 import Row from "react-bootstrap/Row";
 
-
 const TodoList = () => {
-  const [pendingTodos, setPendingTodos] = useState([]);
-  const [completedTodos, setCompletedTodos] = useState([]);
+  const [todos, setTodos] = useState([]);
+  const [draftTodo, setDraftTodo] = useState("");
 
-  const addTodo = (description) => {
-    setPendingTodos([description, ...pendingTodos]);
+  const addTodo = () => {
+    setTodos([{ description: draftTodo, complete: false }, ...todos]);
+    setDraftTodo("");
   };
 
   const completeTodoItem = (index) => {
-    const completedItem = pendingTodos.splice(index, 1);
-    setCompletedTodos([...completedItem, ...completedTodos]);
-    setPendingTodos([...pendingTodos]);
+    const existingTodos = todos;
+    const completedItem = todos[index];
+    existingTodos[index] = {
+      description: completedItem.description,
+      complete: true,
+    };
+    setTodos([...existingTodos]);
   };
 
   const renderTodoForm = () => {
-    let input;
     return (
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          addTodo(input.value);
-          input.value = "";
+          addTodo();
+          e.target.reset();
         }}
       >
         <input
-          ref={(node) => {
-            input = node;
+          onChange={(e) => {
+            setDraftTodo(e.target.value);
           }}
           placeholder="add task"
         />
@@ -41,42 +44,45 @@ const TodoList = () => {
     );
   };
 
-  const renderPendingTodos = () => {
-    const pendingTodoList = pendingTodos.map((todo, index) => {
-      return (
-        <PendingTodoItem
-          description={todo}
-          completeTodoItem={completeTodoItem}
-          index={index}
-          key={index}
-        />
-      );
+  const renderTodos = () => {
+    const pendingTodos = [];
+    const completedTodos = [];
+
+    todos.forEach((todo, index) => {
+      if (todo.complete) {
+        completedTodos.push(
+          <CompletedTodoItem description={todo.description} key={index} />
+        );
+      } else {
+        pendingTodos.push(
+          <PendingTodoItem
+            description={todo.description}
+            completeTodoItem={completeTodoItem}
+            index={index}
+            key={index}
+          />
+        );
+      }
     });
 
     return (
       <>
-        {pendingTodoList.length > 0 && (
-          <Card style={{ width: "18rem" }} border="primary">
-            <Card.Header>Pending Todos</Card.Header>
-            <ListGroup>{pendingTodoList}</ListGroup>
-          </Card>
+        {pendingTodos.length > 0 && (
+          <Row className="justify-content-center mt-3">
+            <Card style={{ width: "18rem" }} border="primary">
+              <Card.Header>Pending Todos</Card.Header>
+              <ListGroup>{pendingTodos}</ListGroup>
+            </Card>
+          </Row>
         )}
-      </>
-    );
-  };
 
-  const renderCompletedTodos = () => {
-    const completedTodoList = completedTodos.map((todo, index) => {
-      return <CompletedTodoItem description={todo} key={index} />;
-    });
-
-    return (
-      <>
-        {completedTodoList.length > 0 && (
-          <Card style={{ width: "18rem" }} border="danger">
-            <Card.Header>Completed</Card.Header>
-            <ListGroup>{completedTodoList}</ListGroup>
-          </Card>
+        {completedTodos.length > 0 && (
+          <Row className="justify-content-center mt-3">
+            <Card style={{ width: "18rem" }} border="danger">
+              <Card.Header>Completed</Card.Header>
+              <ListGroup>{completedTodos}</ListGroup>
+            </Card>
+          </Row>
         )}
       </>
     );
@@ -88,8 +94,7 @@ const TodoList = () => {
         <h2>Todo List</h2>
       </Row>
       <Row className="justify-content-center">{renderTodoForm()}</Row>
-      <Row className="justify-content-center mt-3">{renderPendingTodos()}</Row>
-      <Row className="justify-content-center mt-2">{renderCompletedTodos()}</Row>
+      {renderTodos()}
     </Container>
   );
 };
